@@ -1,17 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-        <meta charset="UTF-8">
-		<title>Testing</title>
-</head>
-<body>
-		<h1>Welcome to the test page</h1>
-		<form method='POST' enctype=multipart/form-data>
-  			<div>
-    			<label>Example file input</label>
-    			<input type=file name=file>
-				<input type=submit value="Upload">
-			</div>
-		</form>
-</body>
-</html>
+{% extends "base.html" %}
+{%import "bootstrap/wtf.html" as wtf%}
+
+{%block page_content%}
+	{{ wtf.quick_form(form) }}
+{%endblock%}
