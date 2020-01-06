@@ -1,5 +1,6 @@
 import os
 import pathlib
+import time
 
 from flask import Flask,render_template,request,flash,redirect
 from flask_bootstrap import Bootstrap 
@@ -22,6 +23,14 @@ class PhotoForm(FlaskForm):
     photo = FileField(validators=[FileRequired()])
     submit = SubmitField('Upload')
 
+@app.before_first_request
+def init():
+    defaults.device = torch.device('cpu')
+    global learn
+    print('Loaded')
+    learn = load_learner(path,'mnist.pkl')
+
+
 @app.route('/',methods=['POST','GET'])
 def index():
     form = PhotoForm()
@@ -31,8 +40,6 @@ def index():
         img_src = os.path.join('static/images',filename)
         f.save(img_src)
         image = open_image(img_src)
-        defaults.device = torch.device('cpu')
-        learn = load_learner(path,'mnist.pkl')
         pred_class,pred_idx,outputs = learn.predict(image)
         return render_template('output.html',output=pred_class)
     return render_template('index.html',form=form)  
