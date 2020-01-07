@@ -1,3 +1,4 @@
+#Rule : Always validate the input on server side.Always.Don't trust the user!
 import os
 import pathlib
 import time
@@ -6,7 +7,7 @@ from flask import Flask,render_template,request,flash,redirect
 from flask_bootstrap import Bootstrap 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField,FileRequired
-from wtforms import SubmitField
+from wtforms import SubmitField,MultipleFileField
 from werkzeug.utils import secure_filename
 from fastai.vision import *
 
@@ -20,7 +21,7 @@ app.config['SECRET_KEY'] = 'secret_key'
 bootstrap = Bootstrap(app)
 
 class PhotoForm(FlaskForm):
-    photo = FileField(validators=[FileRequired()])
+    photo = MultipleFileField()
     submit = SubmitField('Upload')
 
 @app.before_first_request
@@ -34,14 +35,18 @@ def init():
 @app.route('/',methods=['POST','GET'])
 def index():
     form = PhotoForm()
+    output = {}
     if form.validate_on_submit():
-        f = form.photo.data
-        filename = secure_filename(f.filename)
-        img_src = os.path.join('static/images',filename)
-        f.save(img_src)
-        image = open_image(img_src)
-        pred_class,pred_idx,outputs = learn.predict(image)
-        return render_template('output.html',output=pred_class)
+        uploaded_files = request.files.getlist("photo")
+        for file in uploaded_files:
+            if file:
+                filename = secure_filename(file.filename)
+                img_src = os.path.join('static/images',filename)
+                file.save(img_src)
+                image = open_image(img_src)
+                pred_class,pred_idx,outputs = learn.predict(image)
+                output[file.filename] = pred_class
+        return render_template('output.html',output=output)
     return render_template('index.html',form=form)  
 
 if __name__ == '__main__':
