@@ -30,27 +30,20 @@ def init():
     global learn
     print('Loaded')
     learn = load_learner(path,'mnist.pkl')
-    global pool
-    pool = multiprocessing.Pool(2)
-
-def get_pred(file):
-    img = open_image(file)
-    pred_class,_,_ = learn.predict(img)
-    return pred_class
 
 @app.route('/',methods=['POST','GET'])
 def index():
     form = PhotoForm()
-    global output 
-    global pool
     output = {}
     if form.validate_on_submit():
         uploaded_files = request.files.getlist("photo")
         for file in uploaded_files:
-            file.save(f'static/images/{file.filename}')
-        uploaded_files = [f'static/images/{file.filename}' for file in uploaded_files]
-        predictions = pool.map(get_pred,uploaded_files)
-        return render_template('output.html',output=predictions)
+            img_src = os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(file.filename))
+            file.save(img_src)
+            image = open_image(img_src)
+            pred_class , _ , _ = learn.predict(image)
+            output[file.filename] = pred_class
+        return render_template('output.html',output=output)
 
     return render_template('index.html',form=form)  
 
