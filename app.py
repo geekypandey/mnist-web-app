@@ -16,8 +16,9 @@ UPLOAD_FOLDER = os.path.join('static','images')
 path = pathlib.Path('models/')
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SECRET_KEY'] = 'secret_key'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER  
+app.config['SECRET_KEY'] = 'secret_key' #put this in environment variable 
+
 bootstrap = Bootstrap(app)
 
 class PhotoForm(FlaskForm):
@@ -44,17 +45,18 @@ def index():
     global output 
     global pool
     output = {}
+    filenames = []
     if form.validate_on_submit():
         uploaded_files = request.files.getlist("photo")
         for file in uploaded_files:
-            file.save(f'static/images/{file.filename}')
-        uploaded_files = [f'static/images/{file.filename}' for file in uploaded_files]
-        predictions = pool.map(get_pred,uploaded_files)
+            filename = os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(file.filename))
+            print(filename)
+            file.save(filename)
+            filenames.append(filename)
+        predictions = pool.map(get_pred,filenames)
         return render_template('output.html',output=predictions)
 
     return render_template('index.html',form=form)  
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
