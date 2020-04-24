@@ -1,0 +1,11 @@
+{% extends "base.html"%}
+{%block page_content%}
+	<div class="container">
+		<h3>Predicted Output :</h3>
+		<div>
+			{%for out in output%}
+			{{out}} : {{output[out]}}<br>
+			{%endfor%}
+		</div>
+	</div>
+{%endblock%}
