@@ -13,3 +13,9 @@ python3 -m pip install -r requirements.txt
 flask run 
 ```
 By default the service will be running at port 5000 and can be accessed at http://localhost:5000/ 
+
+## TODO
+- [ ] Image to be displayed when added by the user
+- [ ] Result should be shown with the images
+- [ ] Single page application
+- [ ] Deployment on Heroku
